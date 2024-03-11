@@ -44,25 +44,29 @@ fs.readdir("./commands", (err, files) => {
 });
 
 const ROLES = [
-    317122329359771756
+  912091088992195016
 ]
 
 client.on("messageCreate", async (message) => {
-    const authorMember = await message.guild.members.fetch(message.author.id);
+  const authorMember = await message.guild.members.fetch(message.author.id).catch(() => null);
 
-    for (let ExceptPPL = 0; ExceptPPL < ROLES.length; ExceptPPL++) {
-        if (authorMember.roles.cache.has(ROLES[ExceptPPL])) {
-            return;
-        }
-    }
+  if (!authorMember) return;
 
-    if (message.author.id == 992297135360216810) return;
-    if (message.author.bot) return;
+  for (let roleId of ROLES) {
+      if (authorMember.roles.cache.has(roleId)) {
+          return;
+      }
+  }
 
-    if (message.content.includes("@everyone")) {
-        message.delete();
-        message.member.ban({days: 7});
-    }
+  if (message.author.id === client.user.id || message.author.bot) return;
+
+  if (message.content.includes("@everyone")) {
+      try {
+          await message.member.ban({ days: 7 });
+      } catch (error) {
+          console.error("Failed to ban member:", error);
+      }
+  }
 });
 
 client.login(TOKEN)
